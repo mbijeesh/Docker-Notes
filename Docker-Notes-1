@@ -1,0 +1,480 @@
+How a container holds all goods that need to deliver to a specific location - same way docker works.
+Developers build application that runs on top of a docker and that can be run on any OS (exception are still) if that OS
+contains Docker installed. 
+
+Create Docker Hub account - We can download the images. Private and public account available.
+
+In VMs
+
+VM1	    VM2
+
+App1        App2
+Libs/Bins  Libs/Bins
+Guest OS   Guest OS
+  Hypervisor
+    Host OS
+
+In Docker
+
+Container1  Container2
+
+App1         App2
+Libs/Bins   Libs/Bins
+   Docker Engine
+    Host OS
+----
+When a docker starts a container a process starts and that have no communication with other docker process.
+
+
+Docker client -> Docker commands
+
+Docker Daemon -> Responsible for creating,running and monitoring the containers and building and storing images
+
+Docker host -> Docker Daemon runs on docker host - Include Containers and images
+
+Docker registry -> Docker Hub (Remote Repository)
+
+Docker CE - Community Edition
+
+Docker EE  - Enterprise Edition
+
+Docker image - Read only template to create containers. Built by docker user. 
+Stored in local or remote repository.(Docker hub)
+
+Docker container : Isolated application platform.
+ Contains everything need to run the application
+ Built from one or more images
+
+After installing docker, there will be a network adapter created - docker0 with IP in 172. series
+##################
+
+Download and follow the installation instructions from Docker site.
+####
+Remove old SW:
+sudo apt-get remove docker docker-engine docker.io
+
+Update the apt package index:
+sudo apt-get update
+
+Install packages to allow apt to use a repository over HTTPS:
+$ sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+Add Docker’s official GPG key:
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+$ sudo apt-key fingerprint 0EBFCD88
+
+Use the following command to set up the stable repository
+$ sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+Update the apt package index.
+$ sudo apt-get update
+
+Install the latest version of Docker CE
+$ sudo apt-get install docker-ce
+
+Doecker daemon start once installation completes.
+systemctl status docker
+
+After installation new network adapter get created.
+$ip add
+
+
+Verify that Docker CE is installed correctly by running the hello-world image.
+This command downloads a test image and runs it in a container. When the container runs, it prints an informational message and exits
+$sudo docker run hello-world
+
+
+$docker images  -  list local images
+$docker ps   - list running containers
+$docker ps -a  ---  show all containers status (running and exited)
+$docker search "image name"  -  search image on remote repository
+
+***Once started the container whatever the changes made inside the container is for temperory. 
+Once container stops you will miss the chnanges. Or we can say the images are  read only.
+If you want the changes permenantly, commit the changes and create a new image.
+
+Get the centos running on deocker,
+Search the image,
+$docker search centos
+To download the image from remote repository,
+$docker pull centos
+$docker images
+$docker run -it centos /bin/bash   -> This will start the container and enter into the container.
+OR use 
+$docker attach <docker id/name>
+$docker ps 
+
+Once you start a container, a virtual ethernet adapter will show in the host. (use ip add)
+
+Application can be accessed by Docker host IP:port. (Remember its not the ip of docker0 ethernet)
+To exit from container and leave the container in running state use ctrl+pq.
+To stop the container, use 'exit' from the container.
+
+Next  test:
+Once you are  inside the container , 
+df -hP   will show that of base host.
+cd /
+mkdir /test
+
+Now come out from the container using ctrl-pq,
+cd /
+ls    -> there will not be the "test" directory
+
+Search inside /var/lib/docker/containers/<containerid>  ; but not there.
+So docker save it in memory only. For persistent change you need to do commit and create a new image
+
+
+
+Using the same image we can start another instance of the application on the same docker host.
+But port number should be different
+
+To start a container we can use
+docker start <container id>
+
+Another image for example. 
+
+$docker pull dirajan/mongo:v6
+$docker run -d -p 3000:3000 dirajan/mongo:v6
+Now browse hostip:3000
+
+If the container started in daemonized mode, we cannot login ( attach ) in to the container.
+
+/var/lib/docker - is the main directory that holds container and image informations.
+Note:This directory can be created as a separate file system.
+
+To remove container:
+-> Exit from container or stop the container
+$docker rm <container-name/ID>
+
+To remove image:
+$docker rmi <image-id>
+
+Detached and root user( attached) mode:
+$docker run -itd  image -> Started container is controlled by docker daemon.
+                            We cannot use docker attach command.
+
+$docker run -it  image -> After container started root user can attach the container and enter into the shel.
+
+#docker system prune  ->  Be carefule using this command
+ will remove all stopped containers 
+ all networks not used by any containers
+ all build cache
+ all dangling images
+    
+
+Docker registry: A service respnsible for hosting and distributing images.Default is docker hub
+
+Docker repository :Collection of related images. (Usually provides different version of same application)
+
+Instead of docker hub,there are other repository as well like Quay.
+
+$docker search  <string> -> will provide related  images/version available
+
+$docker history <imageid>
+
+Tag is a label applied to an image or the string applied to the end of image name(nginx:latest) Here latest is the tag
+$docker tag  nginx:latest  bijeeshm/nginx:version1
+
+Above command will create one image with tag 'version1'.
+
+Also this is useful when you need to push an image which you downloaded from dockerhub to your dockerhub repository.
+For this  use
+$docker login
+<dockerid>
+<password>
+$docker push bijeeshm/nginx:version1
+$docker tag nginx:latest bijeeshm/nginx:version2
+$docker push bijeeshm/nginx:version2
+Now in my dockerhub account there is one  repository -bijeeshm/nginx which holds two versions of the images.
+
+Now I am removing all nginx images from locally. 
+$docker rmi bijeeshm/nginx:version1
+$docker rmi bijeeshm/nginx:version2
+$docker rmi nginx/latest
+
+Now I am pulling the version1 from my own repository:
+$docker pulll bijeeshm/nginx:version1
+
+To see the history of an image
+Docker history <image id>
+
+Repository:
+  Collection of related images
+> Local : The images pulled from remote repository stored locally .
+> Private: Can get ONE private repository from docker hub. For more need to pay.
+> Public : All the repository except private and available in docker hub.
+
+
+Lets start container from nginx image.
+$docker  run -ti  -p 4000:80 nginx /bin/bash  
+(-t - terminal: -i - interactive : -p is port: 4000 is the port number mapped for host : 80 is the port number for nginx in the container)
+
+Once you start this way, you will enter to the nginx container.
+$service nginx status
+$service nginx start
+Now try to open the URL: <hostIP>:4000 ; it should open the nginx home page which is running from the container.
+
+
+Next:(This is one way of packaging an application into an image)
+[ download image, start the container, change some contents, stop the container , do commit,
+ remove that container, start the container from commited image, check if the changes are reflecting,
+  upload the image to your doecker hub ]
+Download the latest ubuntu image from docker
+$docker pull ubuntu
+$docker images
+$docker run -ti  ubuntu /bin/bash
+
+From ubuntu container,
+   /#apt-get update
+   /#vim hello  -> vim is not there , so install vim
+   /#apt-get install vim
+   /#service nginx status  -> not available, so install nginx as well
+   /#apt-get install nginx
+Now we have installed vim and nginx on this container. Now exit from the container.
+$docker ps -a
+$docker commit -m "nginxvim"   7ba0e2fd6d15 bijeeshm/nginxvim:vim1
+-m message , then container ID , then repository/imagename:tag
+if you want to store the image locally, no need to give the repository name
+
+$ docker images    -> will show new image.
+
+$docker run -ti bijeeshm/nginxvim:vim1
+Now  ctr-pq , and come out of the container.
+Push this to your remote  repository. 
+$docker push  bijeeshm/nginxvim:vim1
+
+NEXT:
+$docker run -ti  -p 4002:80 bijeeshm/nginxvim:vim1
+$vi /var/www/html/*.html   ->  Chnage "welcome to nginx to 'UPDATED nginx'"
+$service nginx start
+Open the URL  <hostip>:4009 
+It should show the Edited Version.
+
+you can use elinks to open the url from linux.
+elinks http://localhost/index.html
+==============================================================
+While starting the container, we can mention -P ( any random port between 32768 and 65000) 
+or -p ( specific port number)
+
+Try starting two containers from same image with differnt port and check the URL. 
+
+docker run -ti  -p 4001:80 nginxvim:vim1
+docker run -ti  -p 4002:80 nginxvim:vim1
+
+Also you can use different name
+docker run -ti -p 4003:80 --name testing nginxvim:vim1
+----
+you cannot upload a container; but only image
+---
+
+To see all information about a container
+$docker inspect <containerID>
+
+ 
+Docker Networking:
+When we install docker, it creates three networks.
+$docker network ls
+
+bridge
+host
+none 
+--
+
+If we use 'host' , it will be share the  host network stack.All interfaces of host will be available to container as well.
+Network configuration inside  the container will be same as host.
+Hostname of the container also show the host's hostname
+
+To start a container in "host" network,
+$docker run -ti --net=host --name=net_test-host01  nginx:latest /bin/bash
+Now see the network parameters of container and compare with docker host.
+Try install nginx and access using the host ip.
+
+Also try install openssh inside a container and start that container with -p 2000:22 and
+try connect the container from the host using 'ssh <hostip>:2000' [ But a container is not designed to
+ access container using ssh ]
+
+------
+'None'  means, container do not have any network interface.So no IP for the container. But it have a loopback ip.
+ Docker add the container to a container-specific network stack.
+ Normally use for running batch jobs ( like hello world - from docker hub)
+
+To start a container in "none" network,
+$docker run -ti --net=none --name=net_test-none01  nginx:latest /bin/bash
+
+$docker inspect <containerID>
+This will show network details are blank
+---
+
+Bridge NW represents docker0 network.
+If we start a container, it will attach to bridge ethernet. ( Normally there will be one virtual ethernet created , 
+which use the IP of docker0 as its gateway.)
+It can assign an IP to container automatically.
+$docker network inspect bridge 
+
+We can manually create a bridge network. Normally create a different subnet than the default bridge
+$docker network create sample_network
+$docker network ls
+$docker network inspect sample_network
+
+Now we can attach a running container to this network, so that that container can have two networks with different subnets
+$docker network connect sample_network <containerID>
+Then check from container (ifconfig)
+Also verify using the inspect command
+$docker network inspect sample_network
+$docker network inspect bridge
+
+
+Create our own bridge subnet 
+$docker network create -d bridge --subnet 172.25.0.0/16 new_network
+$docker network ls
+$docker network inspect new_network
+
+Start a container using that network
+$docker run -ti --network=new_network  --name=test_net  <imageid>  /bin/bash
+From the container check the ip
+Try ping to other containers in different subnet.
+It only allow to ping the gateway of other container  networks
+
+We can also connect other network to this container
+$docker network connect <networkname> <containerid>
+
+Default bridge network cannot handle DNS, so you should use IPs instead of container name.
+If we need to do like that , add a new network
+
+You can mention IP address of a container while starting
+$docker eun -ti --name=web01 --network=new_network --ip=172.x.y.z <containername> /bin/bash
+
+--
+Network Layer7 routing -> give example.com  to 192.168.4.8:8000 
+---
+Ports
+$docker run -ti -p 8000:80 nginx /bin/bash
+$docker ps
+
+Docker host port 8000 is mapped to container port 80.
+
+To use random port 
+$docker run -ti -P nginx /bin/bash
+$docker ps
+==========
+Docker Volume
+>To keep data even though the container restarts/stop/delete.
+>To share the data between host file system and docker container
+>To share the data with other docker containers
+
+Create a data volume container
+$docker create -v /data-volume --name datacontainer ubuntu (??)
+$docker volume inspect <volumename>
+
+Default this will create inside /var/lib/docker/volumes/_data
+To use it,
+$docker run -ti --volumes-from datacontainer ubuntu /bin/bash
+From the container check df -hP. It will show as /data-volume.
+Now create a file inside /data-volume.
+Stop the container and you can see that file from  docker host at /var/lib/docker/volumes/_data/<volumename>
+Create a file from the docker host at the same place and try to see it from the container as well.
+Now remove the container, still the data present in the docker host.
+
+Now create an exclusive file system for the data-volume (/apps/data) in docker host.
+And run the container using that file system (or directory) as the data-volume.
+$docker run -ti -v /apps/data/:/data  ubuntu:latest /bin/bash
+Now you can see /data is mounted on the container.(which is the /apps/data on the docker host)
+Create file and see from the docker host and vice versa 
+
+From host create /apps/data/index.html  ( echo "This is welcome message" > /apps/data/index.html)
+$ocker run -ti -v /apps/data:/var/www/html -p 9000:80 nginx:latest /bin/bash  (Check the nginx default root at /etc/nginx/conf.d)
+(Some times it may be at /usr/share/nginx/html)
+
+$service nginx start  (From container)
+Try access the page using hostip:9000
+
+Use of GIT:
+Now initiate /apps/data/ as git repo
+$cd /apps/data/ 
+$git init 
+$git clone https://github.com/    (any project with sample html file)
+Again try access the page using hostip:9000
+
+Edit the file from github and do git pull from the directory again and try access  the page. 
+(So this way we can update the fron end page of an application. 
+As we are using persistent volume even if the container stopped data will not lose)
+
+Q. See how to change docker default path from /var/lib/docker to other.
+
+Docker File
+==========
+$touch Dockerfile
+FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install net-tools -y
+
+$docker build -t new_image .
+
+$docker images
+$docker run -ti new_image /bin/bash
+
+
+Next:
+$vi Dockerfile
+FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install net-tools -y
+RUN apt-get install nginx -y
+EXPOSE 80
+$docker build -t nginx_v1 <location of build file>
+$docker images
+$docker history nginx_v1
+
+run the docker using the new image and chek the port
+$docker run -ti -P nginx_v1 /bin/bash
+
+
+Next:
+$vi Dockerfile
+FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install net-tools -y
+RUN apt-get install nginx -y
+EXPOSE 80
+CMD service nginx start && /bin/bash
+
+$docker build -t nginx_v2 <location of build file>
+$docker images
+$docker history nginx_v2
+$docker run -dti -p 4000:80 nginx_v2 /bin/bash   ##Ditached mode
+$docker ps
+
+
+Next:  [ RUN is used to create the image and CMD use while start the container][WORKDIR - where you land once you attach docker]
+$vi Dockerfile
+FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install net-tools -y
+RUN apt-get install nginx -y
+RUN apt-get install git -y
+RUN mkdir /myvol
+WORKDIR /myvol
+RUN touch test
+RUN echo "This is created from docker file" >> test
+WORKDIR /var/www/html
+#RUN git clone https://github.com/mbijeesh/test
+RUN git clone https://github.com/vrdipu/Angular_exampple.git
+VOLUME /myvol
+EXPOSE 80
+CMD service nginx start && /bin/bash
+
+$docker build -t nginx_v3 <location of build file>
+$docker images
+$docker history nginx_v3
+$docker run -dti -p 4001:80 nginx_v3 /bin/bash 
+
+** Dockerfile  ->  inside one directory you can create only one Dockerfile. (D caps )
+
