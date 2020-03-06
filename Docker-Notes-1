@@ -1,4 +1,4 @@
-How a container holds all goods that need to deliver to a specific location - same way docker works.
+﻿How a container holds all goods that need to deliver to a specific location - same way docker works.
 Developers build application that runs on top of a docker and that can be run on any OS (exception are still) if that OS
 contains Docker installed. 
 
@@ -477,4 +477,3 @@ $docker history nginx_v3
 $docker run -dti -p 4001:80 nginx_v3 /bin/bash 
 
 ** Dockerfile  ->  inside one directory you can create only one Dockerfile. (D caps )
-
