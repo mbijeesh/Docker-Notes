@@ -37,12 +37,12 @@ for i in `docker ps -a| grep -v  CONTAINER | awk {'print $1'}`; do docker rm $i 
 Delete all images
 for i in `docker ps | grep -v  CONTAINER | awk {'print $1'}`; do docker stop $i ;done
 ==============
+
 Instead of the default tag, give a name to the container
+
 #docker run  -td  --name mydocker ubuntu
+
 ----------
-
-
-
 
 
 
