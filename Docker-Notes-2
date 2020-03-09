@@ -1,0 +1,45 @@
+﻿docs.docker.com
+Get ddocker
+Select the OS and follow the installation steps.Or you can use the automated script. 
+Go to docker hub.
+check for an image. Basic steps. 
+#docker pull ubuntu
+#docker run -it ubuntu /bin/bash
+#docker ps     - show  running containers
+#docker stop <container id>
+#docker ps -a   - show all containers including stopped.
+#docker start <container id>
+#docker exec <container id >  cat  /etc/hosts  - run remote commands 
+#docker images   - show docker images
+#docker ps
+#docker stop <container id> 
+#docker rm <container id>    -  remove the container
+#docker rmi <image id>    -  remove the image
+
+#docker run <image>   - will pull the image and run it.
+=====================
+#docker run  kodekloud/simple-webapp  - container runs in attached mode.
+The stdd out is displaying on the console.
+To run this in detached mode, 
+#docker run -d kodekloud/simple-webapp
+#docker ps
+To attach the container again, run
+#docker attach <container id>
+-----
+run the ubuntu in ditached mode and will be up for 100 sec.
+#docker run -d ubuntu sleep  100
+--------
+Stop all containers
+for i in `docker ps | grep -v  CONTAINER | awk {'print $1'}`; do docker stop $i ;done
+Delete all containers
+for i in `docker ps -a| grep -v  CONTAINER | awk {'print $1'}`; do docker rm $i ;done
+
+Delete all images
+for i in `docker ps | grep -v  CONTAINER | awk {'print $1'}`; do docker stop $i ;done
+==============
+
+
+
+
+
+
