@@ -41,6 +41,21 @@ for i in `docker ps | grep -v  CONTAINER | awk {'print $1'}`; do docker stop $i 
 Instead of the default tag, give a name to the container
 
 #docker run  -td  --name mydocker ubuntu
-
 ----------
-This is  a new feature
+docker run redis  -> will run using the latest version  of redis from docker hub.
+docker run redis:4.0  -> specify perticular version.
+-i  -> interactive mode
+-t  -> psudo terminal 
+-p <host port>:<container port>  =>  Port  mapping 
+-v <host volume>:<container volume>  => volume mapping 
+------
+docker inspect <container id >  =>more information
+docker logs <container id >  => logs about the container
+----
+Try download jeenkins and start 
+---
+
+
+
+
+
