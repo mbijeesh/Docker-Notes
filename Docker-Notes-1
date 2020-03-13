@@ -158,15 +158,14 @@ To remove image:
 $docker rmi <image-id>
 
 Detached and root user( attached) mode:
-$docker run -itd  image -> Started container is controlled by docker daemon.
-                            We cannot use docker attach command.
-
+$docker run -itd  image -> Started container in background of the terminal.
+              
 $docker run -it  image -> After container started root user can attach the container and enter into the shel.
 
 #docker system prune  ->  Be carefule using this command
  will remove all stopped containers 
  all networks not used by any containers
- all build cache
+ all danglingbuild cache
  all dangling images
     
 
@@ -243,6 +242,7 @@ $docker ps -a
 $docker commit -m "nginxvim"   7ba0e2fd6d15 bijeeshm/nginxvim:vim1
 -m message , then container ID , then repository/imagename:tag
 if you want to store the image locally, no need to give the repository name
+$docker commit -m "nginxvim"   7ba0e2fd6d15 nginxvim:v1
 
 $ docker images    -> will show new image.
 
@@ -250,6 +250,12 @@ $docker run -ti bijeeshm/nginxvim:vim1
 Now  ctr-pq , and come out of the container.
 Push this to your remote  repository. 
 $docker push  bijeeshm/nginxvim:vim1
+
+OR 
+
+docker tag nginx-hello bijeeshm/nginx-hello
+docker push  bijeeshm/nginx-hello
+
 
 NEXT:
 $docker run -ti  -p 4002:80 bijeeshm/nginxvim:vim1
@@ -404,7 +410,7 @@ $git clone https://github.com/    (any project with sample html file)
 Again try access the page using hostip:9000
 
 Edit the file from github and do git pull from the directory again and try access  the page. 
-(So this way we can update the fron end page of an application. 
+(So this way we can update the front end page of an application. 
 As we are using persistent volume even if the container stopped data will not lose)
 
 Q. See how to change docker default path from /var/lib/docker to other.

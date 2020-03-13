@@ -52,7 +52,11 @@ docker run redis:4.0  -> specify perticular version.
 docker inspect <container id >  =>more information
 docker logs <container id >  => logs about the container
 ----
-Try download jeenkins and start 
+jenkins
+try download jenkins image
+#docker pull jenkins
+#docker run -d -p 8080:8080 -p 50000:50000 jenkins 
+Now try access the jenkins howm page using (dockerhost:8080)
 ---
 
 
